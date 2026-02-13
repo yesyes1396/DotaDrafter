@@ -78,7 +78,7 @@ h1{
 #statsSummary{
   position:absolute;
   right:18px;
-  top:18px;
+  top:15%;
   color:var(--muted);
   font-size:12px;
   white-space:nowrap;
