@@ -1,7 +1,6 @@
 # Dota Drafter
 
 A simple web game where you guess a random Dota 2 hero.
-Простая веб-игра, в которой нужно угадать случайного героя Dota 2.
 
 ### Description / Описание
 
