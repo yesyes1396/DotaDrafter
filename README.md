@@ -3,27 +3,21 @@
 A simple web game where you guess a random Dota 2 hero.
 Простая веб-игра, в которой нужно угадать случайного героя Dota 2.
 
-Description / Описание
+### Description / Описание
 
 Guess the hidden hero using hints about roles, attribute, attack type, difficulty, and release year.
 Угадайте скрытого героя, используя подсказки по ролям, атрибуту, типу атаки, сложности и году выпуска.
 
-Features / Возможности
+### Features / Возможности
 
-All actual heroes up to February 2026
+- All actual heroes up to February 2026
 Все Актуальные герои до Февраля 2026
 
-Hint system with match indicators
+- Hint system with match indicators
 Система подсказок с отображением совпадений
 
-Autocomplete search
+- Autocomplete search
 Автодополнение при вводе
-
-View all heroes
-Просмотр списка всех героев
-
-Give up option
-Кнопка «Сдаться»
 
 ## Запустите локальный сервер / Launch a local server
 py -m http.server 5000
