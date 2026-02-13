@@ -9,13 +9,13 @@ Guess the hidden hero using hints about roles, attribute, attack type, difficult
 
 ### Features / Возможности
 
-- All actual heroes up to February 2026
+- All actual heroes up to February 2026 /
 Все Актуальные герои до Февраля 2026
 
-- Hint system with match indicators
+- Hint system with match indicators /
 Система подсказок с отображением совпадений
 
-- Autocomplete search
+- Autocomplete search /
 Автодополнение при вводе
 
 ## Запустите локальный сервер / Launch a local server
