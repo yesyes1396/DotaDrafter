@@ -25,11 +25,11 @@ View all heroes
 Give up option
 Кнопка «Сдаться»
 
-##Запустите локальный сервер / Launch a local server
+## Запустите локальный сервер / Launch a local server
 py -m http.server 5000
 
-##Откройте браузер / Open browser
+## Откройте браузер / Open browser
 http://localhost:5000
 
-##Author:
+## Author:
 github: yesyes1396
