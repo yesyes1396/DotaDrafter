@@ -713,7 +713,7 @@
   },
   {
     "name": "Io",
-    "gender": "Нет",
+    "gender": "Other",
     "types": [
       "Fundamental"
     ],
@@ -1356,7 +1356,7 @@
   },
   {
     "name": "Phoenix",
-    "gender": "Нет",
+    "gender": "Other",
     "types": [
       "Elemental",
       "Star"
@@ -1392,7 +1392,7 @@
   },
   {
     "name": "Puck",
-    "gender": "Нет",
+    "gender": "Other",
     "types": [
       "Fae",
       "Dragon"

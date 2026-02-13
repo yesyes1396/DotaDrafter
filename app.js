@@ -187,11 +187,12 @@ function loadDailyProgress(){
   }
 }
 
-function saveDailyProgress(status){
+function saveDailyProgress(status, heroName){
   try{
     localStorage.setItem(DAILY_PROGRESS_KEY, JSON.stringify({
       date: getTodayKey(),
-      status: status
+      status: status,
+      hero: heroName
     }));
   }catch(e){}
 }
@@ -238,12 +239,19 @@ function pickRandom(){
 
 function getDailyHero(){
   if(!heroes.length) return null;
-  const now = new Date();
-  const utc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-  const epoch = Date.UTC(2024,0,1);
-  const days = Math.floor((utc - epoch) / 86400000);
-  const idx = ((days % heroes.length) + heroes.length) % heroes.length;
-  return heroes[idx];
+  const today = getTodayKey();
+  const progress = loadDailyProgress();
+  
+  // If we already have a hero for today, use it
+  if(progress && progress.hero){
+    const found = heroes.find(h => h.name === progress.hero);
+    if(found) return found;
+  }
+  
+  // Pick a new random hero for today
+  const hero = pickRandom();
+  saveDailyProgress(progress ? progress.status : false, hero.name);
+  return hero;
 }
 
 // Start new game
@@ -553,14 +561,14 @@ function processGuessWithHero(hero){
     input.disabled = true;
     message.textContent = `🎉 Correct! The hero is ${secret.name}.`;
     if(mode === 'daily'){
-      saveDailyProgress('win');
+      saveDailyProgress('win', secret.name);
     }
   } else if(hardMode && attempts >= HARD_MAX_ATTEMPTS){
     gameOver = true;
     input.disabled = true;
     message.textContent = `No attempts left (${attempts}/${HARD_MAX_ATTEMPTS}). The hero was: ${secret.name}.`;
     if(mode === 'daily'){
-      saveDailyProgress('lose');
+      saveDailyProgress('lose', secret.name);
     }
   } else {
     let msg = `No, this is not ${hero.name}. Check the hints in the row.`;
