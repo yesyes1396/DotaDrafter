@@ -259,7 +259,8 @@
     "attr": "STR",
     "attack": "Melee",
     "complexity": "Easy",
-    "year": "2012"
+    "year": "2012",
+    "internal": "centaur"
   },
   {
     "name": "Chaos Knight",
@@ -997,7 +998,8 @@
     "attr": "UNI",
     "attack": "Melee",
     "complexity": "Medium",
-    "year": "2012"
+    "year": "2012",
+    "internal": "magnataur"
   },
   {
     "name": "Marci",
@@ -1193,7 +1195,8 @@
     "attr": "INT",
     "attack": "Ranged",
     "complexity": "Easy",
-    "year": "2010"
+    "year": "2010",
+    "internal": "necrolyte"
   },
   {
     "name": "Night Stalker",
@@ -1505,7 +1508,8 @@
     "attr": "INT",
     "attack": "Ranged",
     "complexity": "Medium",
-    "year": "2024"
+    "year": "2024",
+    "internal": "ringmaster"
   },
   {
     "name": "Rubick",
@@ -1951,7 +1955,8 @@
     "attr": "STR",
     "attack": "Melee",
     "complexity": "Medium",
-    "year": "2016"
+    "year": "2016",
+    "internal": "abyssal_underlord"
   },
   {
     "name": "Undying",
@@ -2126,7 +2131,8 @@
     "attr": "UNI",
     "attack": "Ranged",
     "complexity": "Medium",
-    "year": "2010"
+    "year": "2010",
+    "internal": "windrunner"
   },
   {
     "name": "Winter Wyvern",

@@ -311,83 +311,109 @@ function getInitials(name){
 function findHeroByName(name){
   const n = normalize(name);
   const compact = normalizeLetters(name);
-  const initials = getInitials(name);
-  return heroes.find(h=>{
+  const result = heroes.find(h=>{
     const hn = normalize(h.name);
     if(hn === n) return true;
     const hc = normalizeLetters(h.name);
     if(compact && hc === compact) return true;
-    const hi = getInitials(h.name);
-    if(initials && hi === initials) return true;
     return false;
   });
+  return result;
 }
 
 const suggestionsEl = document.getElementById('suggestions');
+let currentSuggestionIndex = -1;
 
-// Generate autocomplete suggestions
-function updateSuggestions(prefix){
-  const q = normalize(prefix);
-  const qLetters = normalizeLetters(prefix);
-  if(!q && !qLetters){ suggestionsEl.style.display='none'; return; }
-  const all = heroes.filter(h=>{
-    const hn = normalize(h.name);
-    const hl = normalizeLetters(h.name);
-    const hi = getInitials(h.name);
-    if(q && hn.includes(q)) return true;
-    if(qLetters && hl.startsWith(qLetters)) return true;
-    if(qLetters && hi.startsWith(qLetters)) return true;
-    return false;
-  });
-  all.sort((a,b)=>{
-    const na = normalize(a.name);
-    const nb = normalize(b.name);
-    // Exact match - highest priority
-    if(na === q && nb !== q) return -1;
-    if(nb === q && na !== q) return 1;
-    // Exact word match (after space/dash) second priority
-    const aWordStart = na.startsWith(q) || /[\s\-]/.test(na.charAt(q.length-1)) && na.includes(' '+q) || na.includes('-'+q);
-    const bWordStart = nb.startsWith(q) || /[\s\-]/.test(nb.charAt(q.length-1)) && nb.includes(' '+q) || nb.includes('-'+q);
-    if(aWordStart && !bWordStart) return -1;
-    if(bWordStart && !aWordStart) return 1;
-    // Starts with query string
-    const aStarts = na.startsWith(q);
-    const bStarts = nb.startsWith(q);
-    if(aStarts && !bStarts) return -1;
-    if(bStarts && !aStarts) return 1;
-    // Position of first occurrence
-    const ai = na.indexOf(q);
-    const bi = nb.indexOf(q);
-    if(ai !== bi) return ai - bi;
-    // Shorter names are usually better matches
-    if(na.length !== nb.length) return na.length - nb.length;
-    // Alphabetical as last resort
-    return na.localeCompare(nb);
-  });
-  const matches = all.slice(0,12);
+// Clean autocomplete with simple, reliable matching
+function updateSuggestions(query){
+  const q = normalize(query).trim();
+  if(!q){ 
+    suggestionsEl.style.display='none'; 
+    currentSuggestionIndex = -1;
+    return; 
+  }
+  
+  // Score each hero based on match quality
+  const scored = heroes.map(h=>{
+    const name = normalize(h.name);
+    let score = -1;
+    let position = -1;
+    
+    // 1. Perfect exact match
+    if(name === q){
+      score = 1000;
+    }
+    // 2. Starts with query
+    else if(name.startsWith(q)){
+      score = 900 - name.length;
+      position = 0;
+    }
+    // 3. Word starts with query (after space/dash)
+    else if(/^.+[\s\-]/.test(name) && name.match(new RegExp(`[\\s\\-]${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`))){
+      score = 800;
+      position = name.indexOf(q);
+    }
+    // 4. Contains query
+    else if(name.includes(q)){
+      score = 700;
+      position = name.indexOf(q);
+    }
+    // 5. Initials match
+    else {
+      const initials = getInitials(h.name);
+      if(initials.startsWith(q)){
+        score = 600;
+      }
+    }
+    
+    return { hero: h, score, position };
+  })
+  .filter(x => x.score >= 0)
+  .sort((a, b) => {
+    if(a.score !== b.score) return b.score - a.score;
+    if(a.position !== b.position && a.position >= 0 && b.position >= 0) return a.position - b.position;
+    return normalize(a.hero.name).localeCompare(normalize(b.hero.name));
+  })
+  .slice(0, 8);
+  
   suggestionsEl.innerHTML = '';
-  if(matches.length===0){ suggestionsEl.style.display='none'; return; }
-  matches.forEach(m=>{
-    const item = document.createElement('button');
-    item.type='button';
-    item.className='list-group-item list-group-item-action bg-transparent text-white';
-    item.textContent = m.name;
-    item.addEventListener('click',()=>{ 
-      suggestionsEl.style.display='none'; 
-      processGuessWithHero(m);
+  
+  if(scored.length === 0){
+    suggestionsEl.style.display='none';
+    currentSuggestionIndex = -1;
+    return;
+  }
+  
+  scored.forEach((item, idx) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'list-group-item list-group-item-action bg-transparent text-white';
+    btn.textContent = item.hero.name;
+    btn.dataset.heroName = item.hero.name;
+    btn.addEventListener('click', () => {
+      input.value = item.hero.name;
+      suggestionsEl.style.display='none';
+      currentSuggestionIndex = -1;
+      processGuessWithHero(item.hero);
     });
-    suggestionsEl.appendChild(item);
+    suggestionsEl.appendChild(btn);
   });
-  const first = suggestionsEl.querySelector('.list-group-item');
-  if(first) first.classList.add('active');
+  
+  currentSuggestionIndex = 0;
+  suggestionsEl.querySelector('.list-group-item')?.classList.add('active');
   suggestionsEl.style.display='block';
 }
 
-input.addEventListener('input',e=>{
+input.addEventListener('input', e => {
   updateSuggestions(e.target.value);
 });
 
-document.addEventListener('click',e=>{ if(!e.target.closest('#suggestions') && !e.target.closest('#guessInput')) suggestionsEl.style.display='none'; });
+document.addEventListener('click', e => {
+  if(!e.target.closest('#suggestions') && !e.target.closest('#guessInput')){
+    suggestionsEl.style.display='none';
+    currentSuggestionIndex = -1;
+  }
+});
 
 function letterMatches(a,b){
   const aa = (a||'').replace(/[^a-zA-Z]/g,'').toLowerCase();
@@ -565,40 +591,54 @@ input.addEventListener('keydown',e=>{
   const items = suggestionsEl.querySelectorAll('.list-group-item');
   const suggestionsVisible = suggestionsEl.style.display==='block' && items.length>0;
 
+  // Arrow navigation
+  if((e.key==='ArrowDown' || e.key==='ArrowUp') && suggestionsVisible){
+    e.preventDefault();
+    if(e.key==='ArrowDown') currentSuggestionIndex = (currentSuggestionIndex + 1) % items.length;
+    else currentSuggestionIndex = (currentSuggestionIndex - 1 + items.length) % items.length;
+    
+    items.forEach((item, idx) => {
+      item.classList.toggle('active', idx === currentSuggestionIndex);
+    });
+    items[currentSuggestionIndex].scrollIntoView({ block: 'nearest' });
+    return;
+  }
+
+  // Tab: fill input with selected suggestion, hide list
   if(e.key==='Tab' && suggestionsVisible){
     e.preventDefault();
-    const active = suggestionsEl.querySelector('.list-group-item.active');
-    if(active){ 
-      const heroName = active.textContent.trim();
+    const selected = items[currentSuggestionIndex];
+    if(selected){
+      const heroName = selected.dataset.heroName;
       input.value = heroName;
+      input.focus();
+      // Hide suggestions after Tab
       suggestionsEl.style.display='none';
-      updateSuggestions(heroName);
+      currentSuggestionIndex = -1;
     }
     return;
   }
 
-  if(e.key==='Enter' && suggestionsVisible){
+  // Enter: submit by input value (not by suggestions)
+  if(e.key==='Enter'){
     e.preventDefault();
     const inputValue = input.value.trim();
-    const heroObj = findHeroByName(inputValue);
-    if(heroObj){
-      suggestionsEl.style.display='none';
-      processGuessWithHero(heroObj);
-      return;
-    }
-    const active = suggestionsEl.querySelector('.list-group-item.active');
-    if(active){ 
-      const heroName = active.textContent.trim();
-      const heroObj2 = findHeroByName(heroName);
-      if(heroObj2){
+    
+    // Try to find by exact input value first
+    if(inputValue){
+      const heroObj = findHeroByName(inputValue);
+      if(heroObj){
         suggestionsEl.style.display='none';
-        processGuessWithHero(heroObj2);
+        currentSuggestionIndex = -1;
+        processGuessWithHero(heroObj);
+        return;
       }
     }
+    
+    // Fall back to regular guess processing
+    processGuess();
     return;
   }
-
-  if(e.key==='Enter') processGuess();
 });
 
 restartBtn.addEventListener('click',()=>{
