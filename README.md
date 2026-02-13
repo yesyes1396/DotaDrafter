@@ -12,7 +12,7 @@ Guess the hidden hero using hints about roles, attribute, attack type, difficult
 ### Features / Возможности
 
 - All actual heroes up to February 2026 /
-Все Актуальные герои до Февраля 2026
+Все актуальные герои до Февраля 2026
 
 - Hint system with match indicators /
 Система подсказок с отображением совпадений

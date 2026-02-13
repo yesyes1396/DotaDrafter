@@ -110,22 +110,7 @@ loadHeroes().then(()=>{
   }));
   loadSettings();
   applySettingsToUI();
-  
-  // Load daily hero from server if in daily mode
-  if(mode === 'daily'){
-    fetchDailyHeroFromServer().then(serverHero => {
-      if(serverHero && serverHero.name){
-        const found = heroes.find(h => h.name === serverHero.name);
-        if(found){
-          const progress = loadDailyProgress();
-          saveDailyProgress(progress ? progress.status : false, serverHero.name);
-        }
-      }
-      startNew();
-    }).catch(() => startNew());
-  } else {
-    startNew();
-  }
+  startNew();
 });
 
 function loadSettings(){
@@ -202,12 +187,11 @@ function loadDailyProgress(){
   }
 }
 
-function saveDailyProgress(status, heroName){
+function saveDailyProgress(status){
   try{
     localStorage.setItem(DAILY_PROGRESS_KEY, JSON.stringify({
       date: getTodayKey(),
-      status: status,
-      hero: heroName
+      status: status
     }));
   }catch(e){}
 }
@@ -252,30 +236,14 @@ function pickRandom(){
   return heroes[Math.floor(Math.random()*heroes.length)];
 }
 
-async function fetchDailyHeroFromServer(){
-  try{
-    const response = await fetch('/api/daily-hero', { cache: 'no-store' });
-    if(!response.ok) return null;
-    const hero = await response.json();
-    return hero && hero.name ? hero : null;
-  }catch(e){
-    return null;
-  }
-}
-
 function getDailyHero(){
   if(!heroes.length) return null;
-  const today = getTodayKey();
-  const progress = loadDailyProgress();
-  
-  // If we already have a hero for today, use it
-  if(progress && progress.hero){
-    const found = heroes.find(h => h.name === progress.hero);
-    if(found) return found;
-  }
-  
-  // This will be replaced by async fetch, but keep as fallback
-  return pickRandom();
+  const now = new Date();
+  const utc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const epoch = Date.UTC(2024, 0, 1);
+  const days = Math.floor((utc - epoch) / 86400000);
+  const idx = ((days % heroes.length) + heroes.length) % heroes.length;
+  return heroes[idx];
 }
 
 // Start new game
@@ -585,14 +553,14 @@ function processGuessWithHero(hero){
     input.disabled = true;
     message.textContent = `🎉 Correct! The hero is ${secret.name}.`;
     if(mode === 'daily'){
-      saveDailyProgress('win', secret.name);
+      saveDailyProgress('win');
     }
   } else if(hardMode && attempts >= HARD_MAX_ATTEMPTS){
     gameOver = true;
     input.disabled = true;
     message.textContent = `No attempts left (${attempts}/${HARD_MAX_ATTEMPTS}). The hero was: ${secret.name}.`;
     if(mode === 'daily'){
-      saveDailyProgress('lose', secret.name);
+      saveDailyProgress('lose');
     }
   } else {
     let msg = `No, this is not ${hero.name}. Check the hints in the row.`;
@@ -702,16 +670,7 @@ if(modeClassicBtn && modeDailyBtn){
     mode = 'daily';
     saveSettings();
     applySettingsToUI();
-    fetchDailyHeroFromServer().then(serverHero => {
-      if(serverHero && serverHero.name){
-        const found = heroes.find(h => h.name === serverHero.name);
-        if(found){
-          const progress = loadDailyProgress();
-          saveDailyProgress(progress ? progress.status : false, serverHero.name);
-        }
-      }
-      startNew();
-    }).catch(() => startNew());
+    startNew();
   });
 }
 
