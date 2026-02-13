@@ -1184,7 +1184,8 @@
     "name": "Necrophos",
     "gender": "Male",
     "types": [
-      "Elf"
+      "Undead",
+      "Wraith",
     ],
     "roles": [
       "Carry",
@@ -1412,7 +1413,7 @@
     "gender": "Мужской",
     "types": [
       "Human",
-      "Wraith"
+      "Undead"
     ],
     "roles": [
       "Disabler",
@@ -2171,7 +2172,8 @@
     "gender": "Male",
     "types": [
       "Human",
-      "Undead"
+      "Undead",
+      "Wraith"
     ],
     "roles": [
       "Carry",
