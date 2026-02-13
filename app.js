@@ -566,13 +566,20 @@ input.addEventListener('keydown',e=>{
 
   if(e.key==='Enter' && suggestionsVisible){
     e.preventDefault();
+    const inputValue = input.value.trim();
+    const heroObj = findHeroByName(inputValue);
+    if(heroObj){
+      suggestionsEl.style.display='none';
+      processGuessWithHero(heroObj);
+      return;
+    }
     const active = suggestionsEl.querySelector('.list-group-item.active');
     if(active){ 
       const heroName = active.textContent.trim();
-      const heroObj = findHeroByName(heroName);
-      if(heroObj){
+      const heroObj2 = findHeroByName(heroName);
+      if(heroObj2){
         suggestionsEl.style.display='none';
-        processGuessWithHero(heroObj);
+        processGuessWithHero(heroObj2);
       }
     }
     return;
