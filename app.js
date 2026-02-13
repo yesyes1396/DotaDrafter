@@ -110,7 +110,22 @@ loadHeroes().then(()=>{
   }));
   loadSettings();
   applySettingsToUI();
-  startNew();
+  
+  // Load daily hero from server if in daily mode
+  if(mode === 'daily'){
+    fetchDailyHeroFromServer().then(serverHero => {
+      if(serverHero && serverHero.name){
+        const found = heroes.find(h => h.name === serverHero.name);
+        if(found){
+          const progress = loadDailyProgress();
+          saveDailyProgress(progress ? progress.status : false, serverHero.name);
+        }
+      }
+      startNew();
+    }).catch(() => startNew());
+  } else {
+    startNew();
+  }
 });
 
 function loadSettings(){
@@ -237,6 +252,17 @@ function pickRandom(){
   return heroes[Math.floor(Math.random()*heroes.length)];
 }
 
+async function fetchDailyHeroFromServer(){
+  try{
+    const response = await fetch('/api/daily-hero', { cache: 'no-store' });
+    if(!response.ok) return null;
+    const hero = await response.json();
+    return hero && hero.name ? hero : null;
+  }catch(e){
+    return null;
+  }
+}
+
 function getDailyHero(){
   if(!heroes.length) return null;
   const today = getTodayKey();
@@ -248,10 +274,8 @@ function getDailyHero(){
     if(found) return found;
   }
   
-  // Pick a new random hero for today
-  const hero = pickRandom();
-  saveDailyProgress(progress ? progress.status : false, hero.name);
-  return hero;
+  // This will be replaced by async fetch, but keep as fallback
+  return pickRandom();
 }
 
 // Start new game
@@ -678,7 +702,16 @@ if(modeClassicBtn && modeDailyBtn){
     mode = 'daily';
     saveSettings();
     applySettingsToUI();
-    startNew();
+    fetchDailyHeroFromServer().then(serverHero => {
+      if(serverHero && serverHero.name){
+        const found = heroes.find(h => h.name === serverHero.name);
+        if(found){
+          const progress = loadDailyProgress();
+          saveDailyProgress(progress ? progress.status : false, serverHero.name);
+        }
+      }
+      startNew();
+    }).catch(() => startNew());
   });
 }
 
