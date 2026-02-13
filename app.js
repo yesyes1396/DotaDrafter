@@ -329,13 +329,26 @@ function updateSuggestions(prefix){
   all.sort((a,b)=>{
     const na = normalize(a.name);
     const nb = normalize(b.name);
+    // Exact match - highest priority
+    if(na === q && nb !== q) return -1;
+    if(nb === q && na !== q) return 1;
+    // Exact word match (after space/dash) second priority
+    const aWordStart = na.startsWith(q) || /[\s\-]/.test(na.charAt(q.length-1)) && na.includes(' '+q) || na.includes('-'+q);
+    const bWordStart = nb.startsWith(q) || /[\s\-]/.test(nb.charAt(q.length-1)) && nb.includes(' '+q) || nb.includes('-'+q);
+    if(aWordStart && !bWordStart) return -1;
+    if(bWordStart && !aWordStart) return 1;
+    // Starts with query string
     const aStarts = na.startsWith(q);
     const bStarts = nb.startsWith(q);
     if(aStarts && !bStarts) return -1;
     if(bStarts && !aStarts) return 1;
+    // Position of first occurrence
     const ai = na.indexOf(q);
     const bi = nb.indexOf(q);
     if(ai !== bi) return ai - bi;
+    // Shorter names are usually better matches
+    if(na.length !== nb.length) return na.length - nb.length;
+    // Alphabetical as last resort
     return na.localeCompare(nb);
   });
   const matches = all.slice(0,12);
@@ -539,7 +552,19 @@ input.addEventListener('keydown',e=>{
   const items = suggestionsEl.querySelectorAll('.list-group-item');
   const suggestionsVisible = suggestionsEl.style.display==='block' && items.length>0;
 
-  if((e.key==='Enter' || e.key==='Tab') && suggestionsVisible){
+  if(e.key==='Tab' && suggestionsVisible){
+    e.preventDefault();
+    const active = suggestionsEl.querySelector('.list-group-item.active');
+    if(active){ 
+      const heroName = active.textContent.trim();
+      input.value = heroName;
+      suggestionsEl.style.display='none';
+      updateSuggestions(heroName);
+    }
+    return;
+  }
+
+  if(e.key==='Enter' && suggestionsVisible){
     e.preventDefault();
     const active = suggestionsEl.querySelector('.list-group-item.active');
     if(active){ 
