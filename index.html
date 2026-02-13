@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dota Drafter</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="./assets/icon.png">
+</head>
+<body>
+
+  <main class="app container">
+
+    <div class="modal fade" id="allHeroesModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content bg-dark">
+          <div class="modal-header">
+            <h5 class="modal-title text-white">All heroes</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <img src="assets/allheroes.png" alt="All Heroes" class="img-fluid" style="max-width:100%;">
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card-app">
+      <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+        <div>
+          <h1 class="h4 mb-1">Dota Drafter</h1>
+          <div class="small-help" id="modeHelp"></div>
+        </div>
+        <div class="d-flex flex-column align-items-end gap-2" style="white-space: nowrap;">
+          <div class="d-flex flex-wrap gap-2 justify-content-end">
+            <div class="btn-group btn-group-sm" role="group" aria-label="Game mode">
+              <button type="button" class="btn btn-outline-secondary active" id="modeClassicBtn">Classic</button>
+              <button type="button" class="btn btn-outline-secondary" id="modeDailyBtn">Daily</button>
+            </div>
+            <div class="form-check form-switch small-help mb-0">
+              <input class="form-check-input" type="checkbox" id="hardModeToggle">
+              <label class="form-check-label" for="hardModeToggle">Hard mode</label>
+            </div>
+          </div>
+          <div class="small-help text-end" id="statsSummary" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="search-shell" style="max-width:640px; position:relative; margin: 0 auto 1rem;">
+        <div class="input-group">
+          <input id="guessInput" class="form-control" placeholder="Type hero name (e.g. Anti-Mage)" autocomplete="off" aria-autocomplete="list">
+          <button id="submitBtn" class="btn btn-primary">Guess</button>
+        </div>
+        <div id="suggestions" class="list-group" style="position:absolute;z-index:1200;left:0;right:0;top:100%;margin-top:4px;display:none;max-height:260px;overflow:auto"></div>
+      </div>
+
+    <div id="message" class="message mb-2" role="status" aria-live="polite"></div>
+    <hr class="divider">
+
+    <div style="overflow-x: auto;">
+      <table class="table table-dark align-middle" id="guesses">
+        <thead>
+          <tr>
+            <th>HERO</th>
+            <th>GENDER</th>
+            <th>RACE</th>
+            <th>ROLES</th>
+            <th>ATTRIBUTE</th>
+            <th>ATTACK TYPE</th>
+            <th>COMPLEXITY</th>
+            <th>RELEASE</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    <div class="d-flex flex-wrap gap-2 mt-3 justify-content-between align-items-center">
+      <div class="d-flex gap-2">
+        <button id="restartBtn" class="btn btn-outline-secondary btn-sm">New game</button>
+        <button id="surrenderBtn" class="btn btn-outline-danger btn-sm">Give up</button>
+      </div>
+      <button id="viewAllHeroesBtn" class="btn btn-link btn-sm text-info p-0">All heroes</button>
+    </div>
+    </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
