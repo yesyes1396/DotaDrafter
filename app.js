@@ -470,9 +470,9 @@ function renderGuessRow(guessHero, lettersCount){
     const ys = Number(rawYearSecret);
     if(!Number.isNaN(yg) && !Number.isNaN(ys)){
       if(yg < ys){
-        yearText = `${year} ↓`;
-      } else if(yg > ys){
         yearText = `${year} ↑`;
+      } else if(yg > ys){
+        yearText = `${year} ↓`;
       }
     }
   }
