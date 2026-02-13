@@ -1,5 +1,7 @@
 # Dota Drafter
 
+https://yesyes1396.github.io/DotaDrafter/
+
 A simple web game where you guess a random Dota 2 hero.
 
 ### Description / Описание

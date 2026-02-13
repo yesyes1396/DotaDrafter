@@ -17,7 +17,7 @@ const statsSummaryEl = document.getElementById('statsSummary');
 let heroes = [];
 let secret = null;
 let gameOver = false;
-let mode = 'classic'; // 'classic' | 'daily'
+let mode = 'daily'; // 'classic' | 'daily'
 let hardMode = false;
 let attempts = 0;
 const HARD_MAX_ATTEMPTS = 6;
@@ -279,11 +279,24 @@ function startNew(){
 }
 
 function normalize(s){
-  return (s||'').trim().toLowerCase();
+  // Normalize unicode, remove diacritics, unify dashes/apostrophes and collapse spaces
+  if(!s) return '';
+  try{
+    let t = String(s);
+    t = t.normalize && t.normalize('NFD') || t;
+    t = t.replace(/\p{Diacritic}/gu, '');
+    t = t.replace(/[\u2010-\u2015\u2212]/g, '-');
+    t = t.replace(/[’‘`ʼ⁄]/g, "'");
+    t = t.replace(/\s+/g, ' ');
+    return t.trim().toLowerCase();
+  }catch(e){
+    return String(s||'').trim().toLowerCase();
+  }
 }
 
 function normalizeLetters(s){
-  return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const n = normalize(s);
+  return n.replace(/[^a-z0-9]/g,'');
 }
 
 function getInitials(name){
