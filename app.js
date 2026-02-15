@@ -60,38 +60,68 @@ function displayGender(g){
 
 // Load heroes from JSON
 function loadHeroes(){
-  return fetch('heroes.json?v=3', { cache: 'no-store' }).then(r=>r.json()).then(base=>{
-    let overrides = null;
-    try{ const raw = localStorage.getItem('dotadle_heroes'); if(raw) overrides = JSON.parse(raw); }catch(e){ overrides = null; }
-    const map = new Map();
-    (base||[]).forEach(h=> map.set(normalize(h.name), Object.assign({}, h)));
-    if(Array.isArray(overrides)){
-      overrides.forEach(o=>{
-        const key = normalize(o.name||'');
-        if(!key) return;
-        const baseEntry = map.get(key) || {};
-        const merged = Object.assign({}, baseEntry);
-        Object.keys(o).forEach(k=>{
-          const v = o[k];
-          if(k==='name') return;
-          if(Array.isArray(v)){
-            if(v.length>0) merged[k]=v;
-            return;
-          }
-          if(v===undefined || v===null) return;
-          if(typeof v === 'string'){
-            const t = v.trim();
-            if(t==='' || t==='-' || t==='—') return;
-            merged[k]=v;
-            return;
-          }
-          merged[k]=v;
-        });
-        map.set(key, merged);
-      });
+  // Try multiple paths for GitHub Pages and local compatibility
+  const timestamp = Date.now();
+  const paths = [
+    `./heroes.json?t=${timestamp}`,      // Current directory
+    `/heroes.json?t=${timestamp}`,        // Root
+    `${window.location.origin}/heroes.json?t=${timestamp}` // Absolute
+  ];
+  
+  const tryFetch = (index) => {
+    if(index >= paths.length) {
+      console.error('Failed to load heroes.json from any path');
+      heroes = [];
+      return Promise.resolve();
     }
-    heroes = Array.from(map.values());
-  }).catch(()=>{ heroes = []; });
+    
+    return fetch(paths[index], { cache: 'no-store' })
+      .then(r => {
+        if(!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(base => {
+        let overrides = null;
+        try{ const raw = localStorage.getItem('dotadle_heroes'); if(raw) overrides = JSON.parse(raw); }catch(e){ overrides = null; }
+        const map = new Map();
+        (base||[]).forEach(h=> map.set(normalize(h.name), Object.assign({}, h)));
+        if(Array.isArray(overrides)){
+          overrides.forEach(o=>{
+            const key = normalize(o.name||'');
+            if(!key) return;
+            const baseEntry = map.get(key) || {};
+            const merged = Object.assign({}, baseEntry);
+            Object.keys(o).forEach(k=>{
+              const v = o[k];
+              if(k==='name') return;
+              if(Array.isArray(v)){
+                if(v.length>0) merged[k]=v;
+                return;
+              }
+              if(v===undefined || v===null) return;
+              if(typeof v === 'string'){
+                const t = v.trim();
+                if(t==='' || t==='-' || t==='—') return;
+                merged[k]=v;
+                return;
+              }
+              merged[k]=v;
+            });
+            map.set(key, merged);
+          });
+        }
+        heroes = Array.from(map.values());
+        if(heroes.length > 0) {
+          console.log(`Successfully loaded ${heroes.length} heroes from ${paths[index]}`);
+        }
+      })
+      .catch(err => {
+        console.warn(`Failed to load heroes from ${paths[index]}:`, err.message);
+        return tryFetch(index + 1);
+      });
+  };
+  
+  return tryFetch(0);
 }
 
 loadHeroes().then(()=>{
