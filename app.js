@@ -60,20 +60,32 @@ function displayGender(g){
 
 // Load heroes from JSON
 function loadHeroes(){
-  // Try multiple paths for GitHub Pages and local compatibility
   const timestamp = Date.now();
+  
+  // Determine base URL correctly for GitHub Pages and local
+  let basePath = '';
+  if(window.location.hostname === 'yesyes1396.github.io') {
+    basePath = '/DotaDrafter';
+  } else if(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    basePath = '';
+  } else {
+    basePath = ''; // Cloudflare Pages root
+  }
+  
   const paths = [
-    `./heroes.json?t=${timestamp}`,      // Current directory
-    `/heroes.json?t=${timestamp}`,        // Root
-    `${window.location.origin}/heroes.json?t=${timestamp}` // Absolute
+    `${basePath}/heroes.json?t=${timestamp}`,
+    `https://raw.githubusercontent.com/yesyes1396/DotaDrafter/master/heroes.json?t=${timestamp}`
   ];
   
   const tryFetch = (index) => {
     if(index >= paths.length) {
       console.error('Failed to load heroes.json from any path');
+      console.error('Tried paths:', paths);
       heroes = [];
       return Promise.resolve();
     }
+    
+    console.log(`Attempting to load heroes from: ${paths[index]}`);
     
     return fetch(paths[index], { cache: 'no-store' })
       .then(r => {
@@ -111,12 +123,10 @@ function loadHeroes(){
           });
         }
         heroes = Array.from(map.values());
-        if(heroes.length > 0) {
-          console.log(`Successfully loaded ${heroes.length} heroes from ${paths[index]}`);
-        }
+        console.log(`✅ Successfully loaded ${heroes.length} heroes from: ${paths[index]}`);
       })
       .catch(err => {
-        console.warn(`Failed to load heroes from ${paths[index]}:`, err.message);
+        console.warn(`⚠️ Failed to load heroes from ${paths[index]}:`, err.message);
         return tryFetch(index + 1);
       });
   };
